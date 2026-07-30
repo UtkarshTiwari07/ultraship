@@ -1,0 +1,13 @@
+CARRIER RATE & LOAD CONFIRMATION
+Reference ID  ADV-NOB-01
+Pickup Date   20-Aug-2026
+EQUIPMENT  Flatbed        AGREED AMOUNT (USD)  $2,500.00 USD
+Stops
+1  Pickup   Nucor Steel, 4537 S Emerald Ave, Chicago, IL 60609, USA
+   Shipping Date & Time  08/20/2026
+   Commodity  Steel Coil   Weight 44,000 lbs   Quantity 4
+2  Drop     Gerdau Yard, 8100 Jackson Rd, Houston, TX 77029, USA
+   Delivery Date & Time  08/23/2026
+   Commodity  Steel Coil   Weight 44,000 lbs   Quantity 4
+Rate Breakdown
+Total                     2,500.00 USD

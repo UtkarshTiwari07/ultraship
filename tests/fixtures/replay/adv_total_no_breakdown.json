@@ -1,0 +1,53 @@
+{
+  "reference_id": {
+    "value_raw": "ADV-NOB-01",
+    "span": "ADV-NOB-01"
+  },
+  "header_pickup_date": {
+    "value_raw": "20-Aug-2026",
+    "span": "20-Aug-2026"
+  },
+  "agreed_amount": {
+    "value_raw": "$2,500.00 USD",
+    "span": "$2,500.00 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "Flatbed",
+    "span": "Flatbed"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Nucor Steel, 4537 S Emerald Ave, Chicago, IL 60609, USA",
+      "date_raw": "08/20/2026",
+      "commodities": [
+        {
+          "description": "Steel Coil",
+          "weight_raw": "44,000 lbs",
+          "quantity_raw": "4"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "drop",
+      "location_raw": "Gerdau Yard, 8100 Jackson Rd, Houston, TX 77029, USA",
+      "date_raw": "08/23/2026",
+      "commodities": [
+        {
+          "description": "Steel Coil",
+          "weight_raw": "44,000 lbs",
+          "quantity_raw": "4"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [],
+  "total_raw": {
+    "value_raw": "2,500.00 USD",
+    "span": "2,500.00 USD"
+  }
+}

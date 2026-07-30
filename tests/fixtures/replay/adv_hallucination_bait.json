@@ -1,0 +1,59 @@
+{
+  "reference_id": {
+    "value_raw": "ADV-HAL-01",
+    "span": "ADV-HAL-01"
+  },
+  "header_pickup_date": {
+    "value_raw": "01-Sep-2026",
+    "span": "Pickup Date   01-Sep-2026"
+  },
+  "agreed_amount": {
+    "value_raw": "$3,400.00 USD",
+    "span": "AGREED AMOUNT (USD)  $3,400.00 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "Step Deck",
+    "span": "Step Deck"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Port of Savannah Gate 3, Savannah, GA, USA",
+      "date_raw": "09/02/2026",
+      "commodities": [
+        {
+          "description": "Granite Slab",
+          "weight_raw": "39,500 lbs",
+          "quantity_raw": "12"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "drop",
+      "location_raw": "Tampa Marine Terminal, Tampa, FL, USA",
+      "date_raw": "09/04/2026",
+      "commodities": [
+        {
+          "description": "Granite Slab",
+          "weight_raw": "39,500 lbs",
+          "quantity_raw": "12"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [
+    {
+      "label": "Fuel Surcharge",
+      "amount_raw": "620.00 USD",
+      "span": "Fuel Surcharge   620.00 USD"
+    }
+  ],
+  "total_raw": {
+    "value_raw": "3,100.00 USD",
+    "span": "Total"
+  }
+}

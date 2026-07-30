@@ -1,0 +1,125 @@
+from datetime import date
+
+import pytest
+
+from ratecon.normalize import (
+    infer_date_locale,
+    parse_date,
+    parse_equipment,
+    parse_money,
+    parse_named_date,
+    parse_place,
+    parse_weight,
+)
+
+TODAY = date(2026, 7, 31)
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("$1,250.50 USD", 1250.50),
+    ("50.00 USD", 50.0),
+    ("$700.00", 700.0),
+    ("2,225.50", 2225.50),
+    ("-", None),
+    ("", None),
+    (None, None),
+])
+def test_parse_money(raw, expected):
+    assert parse_money(raw) == expected
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("28-Jul-2026", date(2026, 7, 28)),
+    ("Jul 28, 2026", date(2026, 7, 28)),
+    ("2026-07-28", date(2026, 7, 28)),
+    ("07/28/2026", None),  # numeric forms are not this function's job
+])
+def test_parse_named_date(raw, expected):
+    assert parse_named_date(raw, TODAY) == expected
+
+
+def test_locale_from_impossible_component():
+    d = infer_date_locale("Shipping 07/30/2026", TODAY)
+    assert (d.locale, d.basis) == ("MDY", "impossible_component")
+
+
+def test_locale_from_impossible_component_dmy():
+    d = infer_date_locale("Shipping 30/07/2026", TODAY)
+    assert (d.locale, d.basis) == ("DMY", "impossible_component")
+
+
+def test_locale_from_corroboration():
+    """An unambiguous named date elsewhere in the document settles the order."""
+    text = "Pickup Date 04-Mar-2026 ... Shipping Date & Time 3/4/26"
+    d = infer_date_locale(text, TODAY)
+    assert (d.locale, d.basis) == ("MDY", "corroboration")
+
+
+def test_locale_falls_back_and_says_so():
+    d = infer_date_locale("Shipping 3/4/26", TODAY)
+    assert (d.locale, d.basis) == ("MDY", "assumed_us")
+
+
+def test_ambiguity_is_reported_not_hidden():
+    p = parse_date("3/4/26", "MDY", TODAY)
+    assert p.value == date(2026, 3, 4)
+    assert p.ambiguous is True
+    assert p.alternate == date(2026, 4, 3)
+
+
+def test_two_digit_year_clamped_to_near_future():
+    assert parse_date("3/4/26", "MDY", TODAY).value.year == 2026
+
+
+def test_place_anchors_on_state_not_first_token():
+    """'Illinois State Police' must not be read as the city."""
+    p = parse_place("Illinois State Police, 100 W Randolph St, Chicago, IL 60601, USA")
+    assert (p.city, p.state, p.zip) == ("Chicago", "IL", "60601")
+
+
+def test_place_strips_airport_codes_and_tolerates_missing_zip():
+    p = parse_place(
+        "Miami International Airport (MIA), Northwest 42nd Avenue, Miami, FL, USA")
+    assert (p.city, p.state, p.zip) == ("Miami", "FL", None)
+
+
+def test_place_multi_token_city():
+    p = parse_place("Hertz Car Rental, Airport Boulevard, San Jose, CA, USA")
+    assert (p.city, p.state) == ("San Jose", "CA")
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ("Flatbed", "flatbed"),
+    ("53' Dry Van", "van"),
+    ("Reefer", "reefer"),
+    ("Refrigerated -10F", "reefer"),
+    ("Step Deck", "other"),      # open-deck variant, not flatbed
+    ("Conestoga", "other"),
+    ("Power Only", "other"),
+    (None, None),
+])
+def test_parse_equipment(raw, expected):
+    assert parse_equipment(raw)[0] == expected
+
+
+def test_weight_unit_assumption_is_info_not_a_risk():
+    val, notes = parse_weight("38,200")
+    assert val == 38200.0
+    assert [s for s, _ in notes] == ["info"]
+
+
+def test_implausible_weight_is_flagged_medium():
+    val, notes = parse_weight("182")
+    assert val == 182.0
+    assert "medium" in [s for s, _ in notes]
+
+
+def test_weight_kg_converted():
+    val, notes = parse_weight("18000 kg")
+    assert round(val) == 39683
+    assert ("info", "converted from kg") in notes
+
+
+@pytest.mark.parametrize("raw", ["-", "", None, "n/a"])
+def test_weight_absent(raw):
+    assert parse_weight(raw)[0] is None

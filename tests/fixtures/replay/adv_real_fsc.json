@@ -1,0 +1,64 @@
+{
+  "reference_id": {
+    "value_raw": "ADV-FSC-01",
+    "span": "ADV-FSC-01"
+  },
+  "header_pickup_date": {
+    "value_raw": "12-Aug-2026",
+    "span": "12-Aug-2026"
+  },
+  "agreed_amount": {
+    "value_raw": "$2,225.50 USD",
+    "span": "$2,225.50 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "53' Dry Van",
+    "span": "53' Dry Van"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Ryder Yard, 2200 S Wolf Rd, Des Plaines, IL 60018, USA",
+      "date_raw": "08/12/2026",
+      "commodities": [
+        {
+          "description": "Packaged Beverages",
+          "weight_raw": "38,200 lbs",
+          "quantity_raw": "26"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "drop",
+      "location_raw": "Kroger DC, 4111 Executive Pkwy, Westerville, OH 43081, USA",
+      "date_raw": "08/14/2026",
+      "commodities": [
+        {
+          "description": "Packaged Beverages",
+          "weight_raw": "38,200 lbs",
+          "quantity_raw": "26"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [
+    {
+      "label": "Line Haul",
+      "amount_raw": "1,800.00 USD",
+      "span": "Line Haul"
+    },
+    {
+      "label": "Fuel Surcharge",
+      "amount_raw": "425.50 USD",
+      "span": "Fuel Surcharge"
+    }
+  ],
+  "total_raw": {
+    "value_raw": "2,225.50 USD",
+    "span": "2,225.50 USD"
+  }
+}

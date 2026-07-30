@@ -1,0 +1,64 @@
+{
+  "reference_id": {
+    "value_raw": "ADV-COR-01",
+    "span": "ADV-COR-01"
+  },
+  "header_pickup_date": {
+    "value_raw": "04-Mar-2026",
+    "span": "04-Mar-2026"
+  },
+  "agreed_amount": {
+    "value_raw": "$2,650.00 USD",
+    "span": "$2,650.00 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "Reefer",
+    "span": "Reefer"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Salinas Cold Storage, 900 Work St, Salinas, CA 93901, USA",
+      "date_raw": "3/4/26",
+      "commodities": [
+        {
+          "description": "Lettuce",
+          "weight_raw": "41,000 lbs",
+          "quantity_raw": "24"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "drop",
+      "location_raw": "Jessup Produce Terminal, 8100 Dorsey Run Rd, Jessup, MD 20794, USA",
+      "date_raw": "3/9/26",
+      "commodities": [
+        {
+          "description": "Lettuce",
+          "weight_raw": "41,000 lbs",
+          "quantity_raw": "24"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [
+    {
+      "label": "Line Haul",
+      "amount_raw": "2,200.00 USD",
+      "span": "Line Haul"
+    },
+    {
+      "label": "Fuel Surcharge",
+      "amount_raw": "450.00 USD",
+      "span": "Fuel Surcharge"
+    }
+  ],
+  "total_raw": {
+    "value_raw": "2,650.00 USD",
+    "span": "2,650.00 USD"
+  }
+}

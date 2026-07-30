@@ -1,0 +1,13 @@
+CARRIER RATE & LOAD CONFIRMATION
+Reference ID  ADV-FLIP-01
+EQUIPMENT  Dry Van        AGREED AMOUNT (USD)  $1,450.00 USD
+Stops
+1  Pickup   Felixstowe Depot, Dock Road, Newark, NJ 07114, USA
+   Shipping Date & Time  9/3/26
+   Commodity  Machine Parts   Weight 12,000 lbs   Quantity 8
+2  Drop     Harrisburg Yard, 3800 Industrial Rd, Harrisburg, PA 17110, USA
+   Delivery Date & Time  4/9/26
+   Commodity  Machine Parts   Weight 12,000 lbs   Quantity 8
+Rate Breakdown
+Line Haul                 1,450.00 USD
+Total                     1,450.00 USD

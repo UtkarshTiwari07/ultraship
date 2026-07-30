@@ -1,0 +1,12 @@
+CARRIER RATE & LOAD CONFIRMATION
+Reference ID  ADV-HAL-01
+EQUIPMENT  Step Deck
+Stops
+1  Pickup   Port of Savannah Gate 3, Savannah, GA, USA
+   Shipping Date & Time  09/02/2026
+   Commodity  Granite Slab   Weight 39,500 lbs   Quantity 12
+2  Drop     Tampa Marine Terminal, Tampa, FL, USA
+   Delivery Date & Time  09/04/2026
+   Commodity  Granite Slab   Weight 39,500 lbs   Quantity 12
+Rate Breakdown
+Total                     3,100.00 USD
