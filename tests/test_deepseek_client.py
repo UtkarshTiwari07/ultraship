@@ -22,13 +22,17 @@ def test_request_targets_v4_pro_on_high():
     # "v4 pro on high" -> thinking enabled at reasoning_effort high, in extra_body
     assert kw["extra_body"]["thinking"] == {
         "type": "enabled", "reasoning_effort": "high"}
-    # structured output via a forced function call carrying the schema
-    assert kw["tool_choice"] == {
-        "type": "function", "function": {"name": "rate_confirmation"}}
-    assert kw["tools"][0]["function"]["parameters"] is SCHEMA
+    # JSON mode, NOT a forced tool_choice (thinking mode rejects that)
+    assert kw["response_format"] == {"type": "json_object"}
+    assert "tool_choice" not in kw
+    assert "tools" not in kw
     assert kw["temperature"] == 0
     assert kw["messages"][0] == {"role": "system", "content": "SYS"}
-    assert kw["messages"][1] == {"role": "user", "content": "USR"}
+    # json_object requires the word "json" in the prompt, and we show the schema
+    user_msg = kw["messages"][1]["content"]
+    assert user_msg.startswith("USR")
+    assert "json" in user_msg.lower()
+    assert "properties" in user_msg  # the schema was embedded
 
 
 def test_reasoning_effort_is_passed_through():

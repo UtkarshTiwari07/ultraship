@@ -35,18 +35,20 @@ Providers (`ratecon/llm.py`), all behind one two-method protocol so swapping is 
 |---|---|---|
 | `openai` (default) | `json_schema` strict — grammar-level guarantee | `OPENAI_API_KEY` · `RATECON_OPENAI_MODEL` |
 | `anthropic` | forced single tool-use | `ANTHROPIC_API_KEY` · `RATECON_ANTHROPIC_MODEL` |
-| `deepseek` | forced function-calling, OpenAI-compatible endpoint | `DEEPSEEK_API_KEY` · `RATECON_DEEPSEEK_MODEL` |
+| `deepseek` | JSON mode (`json_object`), OpenAI-compatible endpoint | `DEEPSEEK_API_KEY` · `RATECON_DEEPSEEK_MODEL` |
 | `replay` | serves recorded output from disk (offline, no key) | — |
 
 Model IDs are env-configurable on purpose: pin a dated snapshot in deployment so a
 provider-side update can't change behaviour silently.
 
 **DeepSeek** defaults to `deepseek-v4-pro` in thinking mode at `reasoning_effort=high`
-(sent via the OpenAI SDK's `extra_body` as DeepSeek's `thinking` object). Override with
+(sent via the OpenAI SDK's `extra_body` as DeepSeek's `thinking` object). It uses **JSON
+mode**, not a forced tool call: DeepSeek's thinking mode rejects a forced `tool_choice`
+(`400 "Thinking mode does not support this tool_choice"`), so the schema is passed in the
+prompt and the object is read back from `message.content`. That weaker guarantee is fine
+by design — Pydantic re-validation, retries, and grounding do the enforcing. Override with
 `RATECON_DEEPSEEK_MODEL`, `RATECON_DEEPSEEK_REASONING_EFFORT` (`high`/`max` for v4-pro;
-v4-flash also accepts `low`), and `RATECON_DEEPSEEK_THINKING`. A reasoning model doesn't
-always return a clean forced tool-call, so the client also falls back to parsing a JSON
-object out of the message content — validation and grounding still gate the result.
+v4-flash also accepts `low`), and `RATECON_DEEPSEEK_THINKING` (`enabled`/`disabled`).
 
 ---
 
