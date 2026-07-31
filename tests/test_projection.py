@@ -7,7 +7,10 @@ import pytest
 
 from ratecon.grounding import money_supported, span_supported
 from ratecon.llm import get_client
+from ratecon.models import Located, RawCharge, RawCommodity, RawStop, RichExtraction
+from ratecon.normalize import infer_date_locale
 from ratecon.pipeline import run
+from ratecon.project import project
 
 TODAY = date(2026, 7, 31)
 ROOT = Path(__file__).parent / "fixtures"
@@ -81,6 +84,58 @@ def test_total_without_breakdown_is_not_back_solved():
     assert res.load.total_rate == 2500.00
     assert res.load.line_haul_rate is None
     assert res.meta["reconciliation"]["status"] == "missing_components"
+
+
+def test_total_line_item_is_not_summed_as_a_charge():
+    """A real model lists the 'Total' row among the rate-breakdown lines.
+
+    It must be read as the document total, not a separate other_charge, or the
+    reconciliation double-counts and wrongly flags an arithmetic mismatch.
+    Regression from a live deepseek-v4-pro extraction of LD64408.
+    """
+    rich = RichExtraction(
+        reference_id=Located(value_raw="LD64408"),
+        equipment_raw=Located(value_raw="Flatbed"),
+        total_raw=Located(value_raw="700.00 USD"),
+        stops=[
+            RawStop(sequence=1, kind="pickup", location_raw="Miami, FL, USA",
+                    date_raw="07/28/2026",
+                    commodities=[RawCommodity(description="Ceramics", weight_raw="-")]),
+            RawStop(sequence=3, kind="drop", location_raw="San Jose, CA, USA",
+                    date_raw="08/05/2026",
+                    commodities=[RawCommodity(description="Ceramics", weight_raw="-")]),
+        ],
+        charges=[
+            RawCharge(label="Base Carrier Rate", amount_raw="500.00 USD"),
+            RawCharge(label="Carrier Charge", amount_raw="200.00 USD"),
+            RawCharge(label="Total", amount_raw="700.00 USD"),   # the row that broke it
+        ],
+    )
+    loc = infer_date_locale("07/28/2026 08/05/2026", TODAY)
+    load, _warns, recon, _notes = project(rich, loc, TODAY)
+    assert load.total_rate == 700.0
+    assert load.line_haul_rate == 500.0
+    assert recon.status == "unmapped_charge"
+    assert recon.other_charges == [{"label": "Carrier Charge", "amount": 200.0}]
+
+
+def test_total_line_item_used_as_total_when_no_explicit_total():
+    """If the only place the total appears is a 'Amount Due' line, use it."""
+    rich = RichExtraction(
+        stops=[
+            RawStop(sequence=1, kind="pickup", location_raw="Dallas, TX", date_raw="03/04/2026"),
+            RawStop(sequence=2, kind="drop", location_raw="Memphis, TN", date_raw="03/09/2026"),
+        ],
+        charges=[
+            RawCharge(label="Line Haul", amount_raw="1800.00"),
+            RawCharge(label="Fuel Surcharge", amount_raw="200.00"),
+            RawCharge(label="Amount Due", amount_raw="2000.00"),   # no separate total field
+        ],
+    )
+    loc = infer_date_locale("03/04/2026 03/09/2026", TODAY)
+    load, _warns, recon, _notes = project(rich, loc, TODAY)
+    assert load.total_rate == 2000.0        # taken from the 'Amount Due' line
+    assert recon.status == "balanced"
 
 
 # ------------------------------------------------------------------ geography
