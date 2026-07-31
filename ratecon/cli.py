@@ -1,4 +1,8 @@
-"""CLI: ratecon <file.txt> [--provider openai|anthropic|deepseek|replay]"""
+"""CLI: ratecon <file> [--provider openai|anthropic|deepseek|replay]
+
+<file> may be .txt, .pdf, .docx or an image (.png/.jpg/...); the text is
+extracted by ratecon.ingest before the pipeline runs.
+"""
 
 from __future__ import annotations
 
@@ -8,6 +12,7 @@ import os
 import sys
 from pathlib import Path
 
+from .ingest import to_text
 from .llm import get_client
 from .pipeline import run
 
@@ -44,7 +49,8 @@ def main(argv: list[str] | None = None) -> int:
 
     results = []
     for path in args.files:
-        text = path.read_text(encoding="utf-8", errors="replace")
+        # Accept .txt / .pdf / .docx / images; extract text up front.
+        text = to_text(path)
         if args.provider == "replay":
             client = get_client("replay", directory=args.replay_dir, key=path.stem)
         else:

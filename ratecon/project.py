@@ -50,6 +50,10 @@ from .normalize import (
 
 _LINE_HAUL = re.compile(r"base|line ?haul|freight charge|transportation|linehaul", re.I)
 _FUEL = re.compile(r"\bfuel\b|\bfsc\b|surcharge", re.I)
+# A "Total" / "Amount Due" row is the document total restated as a line item.
+# Real models list it among the rate-breakdown lines; it must not be summed
+# into other_charges or it double-counts and breaks reconciliation.
+_TOTAL = re.compile(r"\btotal\b|\bamount due\b|\bbalance due\b|\bgrand total\b", re.I)
 
 MONEY_TOL = 0.01
 
@@ -208,6 +212,7 @@ def _rates(rich: RichExtraction, load: LoadSchema,
            warns: list[Warning_]) -> Reconciliation:
     line_haul = fuel = None
     other: list[dict] = []
+    total_from_charge = None
 
     for ch in rich.charges:
         amt = parse_money(ch.amount_raw)
@@ -219,10 +224,18 @@ def _rates(rich: RichExtraction, load: LoadSchema,
             fuel = amt if fuel is None else fuel + amt
         elif _LINE_HAUL.search(ch.label):
             line_haul = amt if line_haul is None else line_haul + amt
+        elif _TOTAL.search(ch.label):
+            # The total restated as a line item -- not a separate charge. Keep
+            # it out of other_charges; use it as the document total only if the
+            # extraction had no explicit total field.
+            if total_from_charge is None:
+                total_from_charge = amt
         else:
             other.append({"label": ch.label.strip(), "amount": amt})
 
     total = parse_money(rich.total_raw.value_raw)
+    if total is None:
+        total = total_from_charge
     load.line_haul_rate = line_haul
     load.fuel_surcharge = fuel
     load.total_rate = total
