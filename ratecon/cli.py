@@ -1,9 +1,10 @@
-"""CLI: ratecon <file.txt> [--provider openai|anthropic|replay]"""
+"""CLI: ratecon <file.txt> [--provider openai|anthropic|deepseek|replay]"""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -11,7 +12,26 @@ from .llm import get_client
 from .pipeline import run
 
 
+def load_dotenv(path: str = ".env") -> None:
+    """Load KEY=VALUE lines from a .env file into the environment.
+
+    Dependency-free, so `DEEPSEEK_API_KEY` etc. can live in a .env file
+    without exporting them by hand. A variable already set in the real
+    environment always wins over the file (``setdefault``).
+    """
+    p = Path(path)
+    if not p.exists():
+        return
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
+
+
 def main(argv: list[str] | None = None) -> int:
+    load_dotenv()
     ap = argparse.ArgumentParser(prog="ratecon")
     ap.add_argument("files", nargs="+", type=Path)
     ap.add_argument("--provider", default="openai",
