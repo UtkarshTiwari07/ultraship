@@ -20,6 +20,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -125,22 +126,80 @@ class AnthropicClient:
         raise RuntimeError("model returned no tool_use block")
 
 
+def deepseek_request_kwargs(model: str, system: str, user: str, schema: dict,
+                            schema_name: str, thinking_type: str,
+                            reasoning_effort: str) -> dict:
+    """Build the chat-completions kwargs for a DeepSeek call.
+
+    Kept as a pure function so the request shape -- model, forced tool, and
+    the thinking/reasoning-effort object -- is unit-testable without the
+    ``openai`` SDK installed. ``thinking`` rides in ``extra_body`` because it
+    is a DeepSeek extension, not an OpenAI field; the OpenAI SDK merges
+    ``extra_body`` into the request body verbatim.
+    """
+    return {
+        "model": model,
+        "temperature": 0,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        "tools": [{
+            "type": "function",
+            "function": {
+                "name": schema_name,
+                "description": "Return the located fields.",
+                "parameters": schema,
+            },
+        }],
+        "tool_choice": {"type": "function", "function": {"name": schema_name}},
+        "extra_body": {
+            "thinking": {"type": thinking_type,
+                         "reasoning_effort": reasoning_effort},
+        },
+    }
+
+
+def json_from_content(text: str) -> dict:
+    """Parse the first balanced JSON object out of a message's content.
+
+    A reasoning model keeps its chain-of-thought in a separate
+    ``reasoning_content`` field, so ``content`` should already be the answer
+    -- but it may not always arrive as a clean forced ``tool_call``. This is
+    the fallback: strip any code fences, then take the first balanced
+    ``{...}``. Downstream Pydantic + grounding still validate the result, so
+    a loose parse here can never become bad data.
+    """
+    t = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.M).strip()
+    start = t.find("{")
+    if start == -1:
+        raise ValueError("no JSON object found in content")
+    depth = 0
+    for i in range(start, len(t)):
+        if t[i] == "{":
+            depth += 1
+        elif t[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return json.loads(t[start:i + 1])
+    raise ValueError("unbalanced JSON object in content")
+
+
 class DeepSeekClient:
-    """DeepSeek via its OpenAI-compatible endpoint, using function calling.
+    """DeepSeek (v4-pro / v4-flash) via its OpenAI-compatible endpoint.
 
-    DeepSeek does not support OpenAI's ``json_schema`` structured-output mode
-    for the final message -- only a looser ``json_object`` JSON mode, plus a
-    beta ``strict`` function-calling mode with a narrower schema vocabulary
-    (no format/pattern/length/range constraints). So the grammar-level
-    guarantee the OpenAI path leans on is not available here.
+    Structured output is obtained with a forced function call (equivalent in
+    shape to the Anthropic tool path). DeepSeek does not offer OpenAI's
+    grammar-level ``json_schema`` mode, so the provider guarantee is weaker
+    here -- which is fine by design: Pydantic re-validation, the retry ladder,
+    and grounding do the real enforcing, so the pipeline degrades gracefully
+    onto a weaker provider instead of breaking.
 
-    That is fine for this pipeline, and the reason is the whole design: the
-    schema is re-validated client-side with Pydantic, the retry ladder
-    repairs malformed output, and grounding discards anything the source did
-    not contain. The provider's guarantee is a convenience, not the thing
-    keeping bad data out. This client therefore uses forced function calling
-    (equivalent in shape to the Anthropic tool path) and lets the downstream
-    validation do the enforcing.
+    Thinking mode is on by default at ``reasoning_effort="high"``. Because a
+    reasoning model does not always emit a clean forced ``tool_call``, the
+    response parser falls back to reading a JSON object out of the message
+    content. Model and effort are env-configurable so a dated snapshot can be
+    pinned in deployment.
     """
 
     name = "deepseek"
@@ -148,12 +207,16 @@ class DeepSeekClient:
     def __init__(self, model: str | None = None) -> None:
         from openai import OpenAI  # DeepSeek ships an OpenAI-compatible API
 
-        # deepseek-chat/-reasoner are legacy aliases retired mid-2026; current
-        # IDs are deepseek-v4-flash / deepseek-v4-pro. Kept configurable so a
-        # provider-side rename never becomes a code change, and so a dated
-        # snapshot can be pinned in deployment to keep behaviour stable.
+        # Current DeepSeek model IDs are deepseek-v4-pro / deepseek-v4-flash.
+        # v4-pro supports reasoning_effort "high" and "max"; v4-flash also
+        # supports "low". Kept configurable so a snapshot can be pinned and a
+        # provider-side rename never becomes a code change.
         self.model = model or os.environ.get("RATECON_DEEPSEEK_MODEL",
-                                             "deepseek-chat")
+                                             "deepseek-v4-pro")
+        self.thinking_type = os.environ.get("RATECON_DEEPSEEK_THINKING",
+                                            "enabled")
+        self.reasoning_effort = os.environ.get(
+            "RATECON_DEEPSEEK_REASONING_EFFORT", "high")
         self._client = OpenAI(
             base_url=os.environ.get("RATECON_DEEPSEEK_BASE_URL",
                                     "https://api.deepseek.com"),
@@ -163,26 +226,17 @@ class DeepSeekClient:
     def complete_json(self, system: str, user: str, schema: dict,
                       schema_name: str) -> dict:
         resp = self._client.chat.completions.create(
-            model=self.model,
-            temperature=0,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            tools=[{
-                "type": "function",
-                "function": {
-                    "name": schema_name,
-                    "description": "Return the located fields.",
-                    "parameters": schema,
-                },
-            }],
-            tool_choice={"type": "function", "function": {"name": schema_name}},
-        )
-        call = resp.choices[0].message.tool_calls
-        if not call:
-            raise RuntimeError("model returned no tool_call")
-        return json.loads(call[0].function.arguments)
+            **deepseek_request_kwargs(self.model, system, user, schema,
+                                      schema_name, self.thinking_type,
+                                      self.reasoning_effort))
+        msg = resp.choices[0].message
+        calls = getattr(msg, "tool_calls", None)
+        if calls:
+            return json.loads(calls[0].function.arguments)
+        content = getattr(msg, "content", None)
+        if content:
+            return json_from_content(content)
+        raise RuntimeError("deepseek returned no tool_call and no JSON content")
 
 
 class ReplayClient:
