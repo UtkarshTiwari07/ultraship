@@ -205,6 +205,17 @@ class DeepSeekClient:
     name = "deepseek"
 
     def __init__(self, model: str | None = None) -> None:
+        # Check the key first so a missing one gives a DeepSeek-specific
+        # message. Otherwise the OpenAI SDK raises about OPENAI_API_KEY, which
+        # is confusing when you meant to use DeepSeek.
+        api_key = os.environ.get("DEEPSEEK_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "DEEPSEEK_API_KEY is not set in this shell's environment. "
+                "Either export it (export DEEPSEEK_API_KEY=sk-...) or put it "
+                "in a .env file in the project root (see .env.example); the "
+                "CLI loads .env automatically.")
+
         from openai import OpenAI  # DeepSeek ships an OpenAI-compatible API
 
         # Current DeepSeek model IDs are deepseek-v4-pro / deepseek-v4-flash.
@@ -220,7 +231,7 @@ class DeepSeekClient:
         self._client = OpenAI(
             base_url=os.environ.get("RATECON_DEEPSEEK_BASE_URL",
                                     "https://api.deepseek.com"),
-            api_key=os.environ.get("DEEPSEEK_API_KEY"),
+            api_key=api_key,
         )
 
     def complete_json(self, system: str, user: str, schema: dict,

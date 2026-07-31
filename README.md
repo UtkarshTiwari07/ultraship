@@ -25,6 +25,10 @@ python -m ratecon.cli path/to/doc.txt --provider openai
 python -m ratecon.cli path/to/doc.txt --provider deepseek   # OpenAI-compatible API
 ```
 
+The CLI auto-loads a `.env` file in the project root (copy `.env.example` to `.env` and
+fill in a key), so exporting by hand is optional. A variable set in the shell wins over
+`.env`. `.env` is gitignored.
+
 Providers (`ratecon/llm.py`), all behind one two-method protocol so swapping is a flag:
 
 | `--provider` | Enforcement mechanism | Env for key / model |
