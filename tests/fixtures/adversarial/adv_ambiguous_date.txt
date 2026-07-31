@@ -1,0 +1,13 @@
+CARRIER RATE & LOAD CONFIRMATION
+Reference ID  ADV-AMB-01
+EQUIPMENT  Dry Van        AGREED AMOUNT (USD)  $1,900.00 USD
+Stops
+1  Pickup   Dallas Logistics Hub, 4800 Cleveland Rd, Dallas, TX 75212, USA
+   Shipping Date & Time  3/4/26
+   Commodity  Paper Goods   Weight 18,400 lbs   Quantity 22
+2  Drop     Memphis Distribution, 3475 Tulane Rd, Memphis, TN 38116, USA
+   Delivery Date & Time  3/9/26
+   Commodity  Paper Goods   Weight 18,400 lbs   Quantity 22
+Rate Breakdown
+Line Haul                 1,900.00 USD
+Total                     1,900.00 USD

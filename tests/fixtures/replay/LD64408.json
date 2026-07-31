@@ -1,0 +1,83 @@
+{
+  "reference_id": {
+    "value_raw": "LD64408",
+    "span": "Reference ID               LD64408"
+  },
+  "header_pickup_date": {
+    "value_raw": "03-Aug-2026",
+    "span": "Pickup Date                03-Aug-2026"
+  },
+  "agreed_amount": {
+    "value_raw": "$700.00 USD",
+    "span": "Flatbed            $700.00 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "Flatbed",
+    "span": "Flatbed            $700.00 USD"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Miami International Airport (MIA), Northwest 42nd Avenue, Miami, FL, USA",
+      "date_raw": "07/28/2026",
+      "commodities": [
+        {
+          "description": "Ceramics",
+          "weight_raw": "-",
+          "quantity_raw": "g"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "pickup",
+      "location_raw": "Illinois State Police, 100 W Randolph St, Chicago, IL 60601, USA",
+      "date_raw": "08/03/2026",
+      "commodities": [
+        {
+          "description": "Commodity_t",
+          "weight_raw": "-",
+          "quantity_raw": "55"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 3,
+      "kind": "drop",
+      "location_raw": "Hertz Car Rental - San Jose - San Jose Mineta International Airport (SJC), Airport Boulevard, San Jose, CA, USA",
+      "date_raw": "08/05/2026",
+      "commodities": [
+        {
+          "description": "Commodity_t",
+          "weight_raw": "-",
+          "quantity_raw": "55"
+        },
+        {
+          "description": "Ceramics",
+          "weight_raw": "-",
+          "quantity_raw": "g"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [
+    {
+      "label": "Base Carrier Rate",
+      "amount_raw": "500.00 USD",
+      "span": "Base Carrier Rate"
+    },
+    {
+      "label": "Carrier Charge",
+      "amount_raw": "200.00 USD",
+      "span": "Carrier Charge"
+    }
+  ],
+  "total_raw": {
+    "value_raw": "700.00 USD",
+    "span": "Total"
+  }
+}

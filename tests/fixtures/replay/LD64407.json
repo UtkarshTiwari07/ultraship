@@ -1,0 +1,59 @@
+{
+  "reference_id": {
+    "value_raw": "LD64407",
+    "span": "Reference ID               LD64407"
+  },
+  "header_pickup_date": {
+    "value_raw": "31-Jul-2026",
+    "span": "Pickup Date                31-Jul-2026"
+  },
+  "agreed_amount": {
+    "value_raw": "$50.00 USD",
+    "span": "Flatbed           $50.00 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "Flatbed",
+    "span": "Flatbed           $50.00 USD"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Illinois State Police, 100 W Randolph St, Chicago, IL 60601, USA",
+      "date_raw": "07/31/2026",
+      "commodities": [
+        {
+          "description": "Ceramics",
+          "weight_raw": "422",
+          "quantity_raw": "10"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "drop",
+      "location_raw": "New York University Jeffrey S. Gould Welcome Center, 50 W 4th Street, New York, NY 10012, USA",
+      "date_raw": "08/02/2026",
+      "commodities": [
+        {
+          "description": "Ceramics",
+          "weight_raw": "422",
+          "quantity_raw": "10"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [
+    {
+      "label": "Base Carrier Rate",
+      "amount_raw": "50.00 USD",
+      "span": "Base Carrier Rate"
+    }
+  ],
+  "total_raw": {
+    "value_raw": "50.00 USD",
+    "span": "Total"
+  }
+}

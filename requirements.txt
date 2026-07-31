@@ -1,0 +1,7 @@
+pydantic>=2.6
+
+# Provider SDKs are imported lazily. Install whichever you use; none is
+# needed to run the test suite, which serves recorded extractions from disk.
+# openai>=1.40      # used by --provider openai AND --provider deepseek
+#                   # (DeepSeek ships an OpenAI-compatible API)
+# anthropic>=0.34   # used by --provider anthropic

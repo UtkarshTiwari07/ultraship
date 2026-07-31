@@ -1,0 +1,83 @@
+{
+  "LD64392": {
+    "load_id": "LD64392",
+    "origin": {"city": "Chicago", "state": "IL", "zip": "60601"},
+    "destination": {"city": "New York", "state": "NY", "zip": "10012"},
+    "pickup_date": "2026-07-30", "delivery_date": "2026-08-01",
+    "equipment_type": "flatbed",
+    "line_haul_rate": 50.0, "fuel_surcharge": null, "total_rate": 50.0,
+    "weight_lbs": 182.0, "commodity": "Ceramics", "confidence": "medium"
+  },
+  "LD64407": {
+    "load_id": "LD64407",
+    "origin": {"city": "Chicago", "state": "IL", "zip": "60601"},
+    "destination": {"city": "New York", "state": "NY", "zip": "10012"},
+    "pickup_date": "2026-07-31", "delivery_date": "2026-08-02",
+    "equipment_type": "flatbed",
+    "line_haul_rate": 50.0, "fuel_surcharge": null, "total_rate": 50.0,
+    "weight_lbs": 422.0, "commodity": "Ceramics", "confidence": "medium"
+  },
+  "LD64408": {
+    "load_id": "LD64408",
+    "origin": {"city": "Miami", "state": "FL", "zip": null},
+    "destination": {"city": "San Jose", "state": "CA", "zip": null},
+    "pickup_date": "2026-07-28", "delivery_date": "2026-08-05",
+    "equipment_type": "flatbed",
+    "line_haul_rate": 500.0, "fuel_surcharge": null, "total_rate": 700.0,
+    "weight_lbs": null, "commodity": "Ceramics; Commodity_t", "confidence": "medium"
+  },
+  "adv_ambiguous_date": {
+    "load_id": "ADV-AMB-01",
+    "origin": {"city": "Dallas", "state": "TX", "zip": "75212"},
+    "destination": {"city": "Memphis", "state": "TN", "zip": "38116"},
+    "pickup_date": "2026-03-04", "delivery_date": "2026-03-09",
+    "equipment_type": "van",
+    "line_haul_rate": 1900.0, "fuel_surcharge": null, "total_rate": 1900.0,
+    "weight_lbs": 18400.0, "commodity": "Paper Goods", "confidence": "medium"
+  },
+  "adv_date_corroborated": {
+    "load_id": "ADV-COR-01",
+    "origin": {"city": "Salinas", "state": "CA", "zip": "93901"},
+    "destination": {"city": "Jessup", "state": "MD", "zip": "20794"},
+    "pickup_date": "2026-03-04", "delivery_date": "2026-03-09",
+    "equipment_type": "reefer",
+    "line_haul_rate": 2200.0, "fuel_surcharge": 450.0, "total_rate": 2650.0,
+    "weight_lbs": 41000.0, "commodity": "Lettuce", "confidence": "high"
+  },
+  "adv_real_fsc": {
+    "load_id": "ADV-FSC-01",
+    "origin": {"city": "Des Plaines", "state": "IL", "zip": "60018"},
+    "destination": {"city": "Westerville", "state": "OH", "zip": "43081"},
+    "pickup_date": "2026-08-12", "delivery_date": "2026-08-14",
+    "equipment_type": "van",
+    "line_haul_rate": 1800.0, "fuel_surcharge": 425.5, "total_rate": 2225.5,
+    "weight_lbs": 38200.0, "commodity": "Packaged Beverages", "confidence": "high"
+  },
+  "adv_total_no_breakdown": {
+    "load_id": "ADV-NOB-01",
+    "origin": {"city": "Chicago", "state": "IL", "zip": "60609"},
+    "destination": {"city": "Houston", "state": "TX", "zip": "77029"},
+    "pickup_date": "2026-08-20", "delivery_date": "2026-08-23",
+    "equipment_type": "flatbed",
+    "line_haul_rate": null, "fuel_surcharge": null, "total_rate": 2500.0,
+    "weight_lbs": 44000.0, "commodity": "Steel Coil", "confidence": "medium"
+  },
+  "adv_locale_flip": {
+    "load_id": "ADV-FLIP-01",
+    "origin": {"city": "Newark", "state": "NJ", "zip": "07114"},
+    "destination": {"city": "Harrisburg", "state": "PA", "zip": "17110"},
+    "pickup_date": "2026-03-09", "delivery_date": "2026-09-04",
+    "equipment_type": "van",
+    "line_haul_rate": 1450.0, "fuel_surcharge": null, "total_rate": 1450.0,
+    "weight_lbs": 12000.0, "commodity": "Machine Parts", "confidence": "medium"
+  },
+  "adv_hallucination_bait": {
+    "load_id": "ADV-HAL-01",
+    "origin": {"city": "Savannah", "state": "GA", "zip": null},
+    "destination": {"city": "Tampa", "state": "FL", "zip": null},
+    "pickup_date": "2026-09-02", "delivery_date": "2026-09-04",
+    "equipment_type": "other",
+    "line_haul_rate": null, "fuel_surcharge": null, "total_rate": 3100.0,
+    "weight_lbs": 39500.0, "commodity": "Granite Slab", "confidence": "low"
+  }
+}

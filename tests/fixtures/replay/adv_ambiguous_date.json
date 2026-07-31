@@ -1,0 +1,59 @@
+{
+  "reference_id": {
+    "value_raw": "ADV-AMB-01",
+    "span": "ADV-AMB-01"
+  },
+  "header_pickup_date": {
+    "value_raw": null,
+    "span": null
+  },
+  "agreed_amount": {
+    "value_raw": "$1,900.00 USD",
+    "span": "$1,900.00 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "Dry Van",
+    "span": "Dry Van"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Dallas Logistics Hub, 4800 Cleveland Rd, Dallas, TX 75212, USA",
+      "date_raw": "3/4/26",
+      "commodities": [
+        {
+          "description": "Paper Goods",
+          "weight_raw": "18,400 lbs",
+          "quantity_raw": "22"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "drop",
+      "location_raw": "Memphis Distribution, 3475 Tulane Rd, Memphis, TN 38116, USA",
+      "date_raw": "3/9/26",
+      "commodities": [
+        {
+          "description": "Paper Goods",
+          "weight_raw": "18,400 lbs",
+          "quantity_raw": "22"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [
+    {
+      "label": "Line Haul",
+      "amount_raw": "1,900.00 USD",
+      "span": "Line Haul"
+    }
+  ],
+  "total_raw": {
+    "value_raw": "1,900.00 USD",
+    "span": "1,900.00 USD"
+  }
+}

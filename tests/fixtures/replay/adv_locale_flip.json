@@ -1,0 +1,59 @@
+{
+  "reference_id": {
+    "value_raw": "ADV-FLIP-01",
+    "span": "ADV-FLIP-01"
+  },
+  "header_pickup_date": {
+    "value_raw": null,
+    "span": null
+  },
+  "agreed_amount": {
+    "value_raw": "$1,450.00 USD",
+    "span": "$1,450.00 USD"
+  },
+  "equipment_raw": {
+    "value_raw": "Dry Van",
+    "span": "Dry Van"
+  },
+  "stops": [
+    {
+      "sequence": 1,
+      "kind": "pickup",
+      "location_raw": "Felixstowe Depot, Dock Road, Newark, NJ 07114, USA",
+      "date_raw": "9/3/26",
+      "commodities": [
+        {
+          "description": "Machine Parts",
+          "weight_raw": "12,000 lbs",
+          "quantity_raw": "8"
+        }
+      ],
+      "span": null
+    },
+    {
+      "sequence": 2,
+      "kind": "drop",
+      "location_raw": "Harrisburg Yard, 3800 Industrial Rd, Harrisburg, PA 17110, USA",
+      "date_raw": "4/9/26",
+      "commodities": [
+        {
+          "description": "Machine Parts",
+          "weight_raw": "12,000 lbs",
+          "quantity_raw": "8"
+        }
+      ],
+      "span": null
+    }
+  ],
+  "charges": [
+    {
+      "label": "Line Haul",
+      "amount_raw": "1,450.00 USD",
+      "span": "Line Haul"
+    }
+  ],
+  "total_raw": {
+    "value_raw": "1,450.00 USD",
+    "span": "1,450.00 USD"
+  }
+}
