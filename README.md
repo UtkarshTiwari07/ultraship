@@ -37,6 +37,13 @@ Providers (`ratecon/llm.py`), all behind one two-method protocol so swapping is 
 Model IDs are env-configurable on purpose: pin a dated snapshot in deployment so a
 provider-side update can't change behaviour silently.
 
+**DeepSeek** defaults to `deepseek-v4-pro` in thinking mode at `reasoning_effort=high`
+(sent via the OpenAI SDK's `extra_body` as DeepSeek's `thinking` object). Override with
+`RATECON_DEEPSEEK_MODEL`, `RATECON_DEEPSEEK_REASONING_EFFORT` (`high`/`max` for v4-pro;
+v4-flash also accepts `low`), and `RATECON_DEEPSEEK_THINKING`. A reasoning model doesn't
+always return a clean forced tool-call, so the client also falls back to parsing a JSON
+object out of the message content — validation and grounding still gate the result.
+
 ---
 
 ## Test it yourself
