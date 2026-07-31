@@ -50,6 +50,31 @@ by design — Pydantic re-validation, retries, and grounding do the enforcing. O
 `RATECON_DEEPSEEK_MODEL`, `RATECON_DEEPSEEK_REASONING_EFFORT` (`high`/`max` for v4-pro;
 v4-flash also accepts `low`), and `RATECON_DEEPSEEK_THINKING` (`enabled`/`disabled`).
 
+### Ingesting real documents (PDF / DOCX / images)
+
+`ratecon.ingest.to_text` dispatches on file extension, so the CLI accepts real files, not
+just `.txt`. Backends are optional and imported lazily — install only what you feed it, and
+you get an actionable error naming the missing package otherwise.
+
+| Input | Install |
+|---|---|
+| `.txt` / `.md` | built in |
+| `.pdf` (born-digital) | `pip install pdfplumber` |
+| `.pdf` (scanned) | `pip install pdfplumber pdf2image pytesseract` + tesseract & poppler binaries |
+| `.docx` | `pip install python-docx` |
+| images (`.png`/`.jpg`/…) | `pip install pytesseract pillow` + tesseract binary |
+
+```bash
+python -m ratecon.cli ratecon.pdf  --provider deepseek
+python -m ratecon.cli ratecon.docx --provider deepseek
+python -m ratecon.cli scan.png     --provider deepseek     # OCR
+```
+
+macOS binaries: `brew install tesseract poppler`. PDF text is extracted layout-preserved
+(rate cons are tables). A scanned PDF with no embedded text falls back to OCR — and OCR
+noise is exactly what grounding and the confidence engine absorb, so a bad scan lands at
+`low`, not at bad data.
+
 ---
 
 ## Test it yourself

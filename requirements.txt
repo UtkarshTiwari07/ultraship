@@ -5,3 +5,10 @@ pydantic>=2.6
 # openai>=1.40      # used by --provider openai AND --provider deepseek
 #                   # (DeepSeek ships an OpenAI-compatible API)
 # anthropic>=0.34   # used by --provider anthropic
+
+# Document ingestion backends (ratecon/ingest.py), also lazy. Install only the
+# ones matching the file types you feed the CLI:
+# pdfplumber>=0.11          # .pdf (born-digital), layout-preserved
+# python-docx>=1.1          # .docx
+# pytesseract>=0.3 ; pillow # images -> OCR (needs the tesseract binary)
+# pdf2image>=1.17           # scanned .pdf -> OCR (needs poppler + tesseract)
