@@ -228,18 +228,24 @@ def _rates(rich: RichExtraction, load: LoadSchema,
             warns.append(_w("CHARGE_UNPARSED", "low",
                             f"could not read amount from {ch.amount_raw!r}"))
             continue
-        if _FUEL.search(ch.label):
+        # Classify on the primary label only. A parenthetical or second-line
+        # note like "(... not included in base rate)" must not make a charge
+        # match _LINE_HAUL on the stray word "base". Keep the full (collapsed)
+        # label for display in other_charges.
+        head = re.split(r"[\n(]", ch.label, maxsplit=1)[0].strip()
+        label = " ".join(ch.label.split())
+        if _FUEL.search(head):
             fuel = amt if fuel is None else fuel + amt
-        elif _LINE_HAUL.search(ch.label):
+        elif _LINE_HAUL.search(head):
             line_haul = amt if line_haul is None else line_haul + amt
-        elif _TOTAL.search(ch.label):
+        elif _TOTAL.search(head):
             # The total restated as a line item -- not a separate charge. Keep
             # it out of other_charges; use it as the document total only if the
             # extraction had no explicit total field.
             if total_from_charge is None:
                 total_from_charge = amt
         else:
-            other.append({"label": ch.label.strip(), "amount": amt})
+            other.append({"label": label, "amount": amt})
 
     total = parse_money(rich.total_raw.value_raw)
     if total is None:
@@ -300,7 +306,11 @@ def _rates(rich: RichExtraction, load: LoadSchema,
                             f"header agreed amount {agreed:.2f} matches rate "
                             f"breakdown total"))
         else:
-            warns.append(_w("TOTAL_DISAGREEMENT", "low",
+            # A review flag, not a hard block: the rate-breakdown total is the
+            # authoritative figure and we keep it, so a disagreeing header
+            # restatement means "confirm before tendering" (medium), not "do
+            # not populate" (low). Money never auto-books at medium anyway.
+            warns.append(_w("TOTAL_DISAGREEMENT", "medium",
                             f"header agreed amount {agreed:.2f} != breakdown total "
                             f"{total:.2f}; kept the breakdown total"))
 
