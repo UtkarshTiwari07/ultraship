@@ -102,6 +102,12 @@ def test_place_strips_ocr_pipe_prefix():
     assert (p.city, p.state, p.zip) == ("Kansas City", "MO", "64120")
 
 
+def test_place_reads_canadian_province():
+    """Cross-border freight: 'Toronto, ON' parses as a province (no US ZIP)."""
+    p = parse_place("200 Carrier Dr., Toronto, ON M9W 5R1, Canada")
+    assert (p.city, p.state, p.zip) == ("Toronto", "ON", None)
+
+
 @pytest.mark.parametrize("raw,expected", [
     ("Flatbed", "flatbed"),
     ("53' Dry Van", "van"),
