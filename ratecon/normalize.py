@@ -251,13 +251,21 @@ def parse_place(raw: Optional[str]) -> ParsedPlace:
         out.zip = z.group(1)
 
     parts = [p.strip(" .") for p in flat.split(",") if p.strip(" .")]
+    # Prefer the "ST ZIP" cell -- real addresses end "City, ST ZIP". This
+    # survives OCR that reflows a stray two-letter token (e.g. 'il') to the
+    # front of the address; anchoring on the *first* state code would read that
+    # noise as the state and lose the real city.
     state_idx = None
     for i, p in enumerate(parts):
-        tok = p.split()[0].upper() if p.split() else ""
+        toks = p.split()
+        tok = toks[0].upper() if toks else ""
         if tok in US_STATES:
-            state_idx = i
-            out.state = tok
-            break
+            has_zip = bool(re.search(r"\b\d{5}\b", p))
+            if state_idx is None or has_zip:
+                state_idx = i
+                out.state = tok
+            if has_zip:
+                break
     if state_idx is None:
         out.notes.append("no US state code found")
         return out
@@ -266,8 +274,9 @@ def parse_place(raw: Optional[str]) -> ParsedPlace:
         return out
 
     city = parts[state_idx - 1]
-    city = re.sub(r"\s*\([^)]*\)", "", city).strip()  # drop '(MIA)' style codes
-    city = re.sub(r"^\d+\s+", "", city)
+    city = re.sub(r"\s*\([^)]*\)", "", city).strip()        # drop '(MIA)' style codes
+    city = re.sub(r"^[A-Za-z0-9]{0,3}\s*\|\s*", "", city)   # OCR cell-bleed like 'TP | '
+    city = re.sub(r"^\d+\s+", "", city).strip()
     out.city = city or None
     if not out.city:
         out.notes.append("city token empty after cleanup")

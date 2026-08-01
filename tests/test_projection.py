@@ -119,6 +119,56 @@ def test_total_line_item_is_not_summed_as_a_charge():
     assert recon.other_charges == [{"label": "Carrier Charge", "amount": 200.0}]
 
 
+def test_ocr_casing_variants_are_one_commodity_not_a_multi():
+    """"Plastic Components." and "plastic Components" are the same commodity.
+
+    Case/punctuation variants from OCR must not fire MULTI_COMMODITY_FLATTENED.
+    Regression from a live OCR run.
+    """
+    rich = RichExtraction(
+        stops=[
+            RawStop(sequence=1, kind="pickup", location_raw="Atlanta, GA 30336",
+                    date_raw="05/22/2025",
+                    commodities=[RawCommodity(description="Plastic Components.")]),
+            RawStop(sequence=2, kind="drop", location_raw="Louisville, KY 40258",
+                    date_raw="05/23/2025",
+                    commodities=[RawCommodity(description="plastic Components")]),
+        ],
+    )
+    loc = infer_date_locale("05/22/2025 05/23/2025", TODAY)
+    load, warns, _recon, _notes = project(rich, loc, TODAY)
+    assert load.commodity == "Plastic Components."          # first-seen spelling
+    assert "MULTI_COMMODITY_FLATTENED" not in {w.code for w in warns}
+
+
+def test_repaired_extraction_is_not_forced_to_low_confidence():
+    """A schema failure the retry ladder repairs must not tank confidence.
+
+    The final object passed validation and grounding; only attempt 1 was
+    malformed. Regression from a live run where the cleanest extraction scored
+    lower than a noisier one purely because it needed one repair.
+    """
+    from ratecon.extract import extract
+
+    class _Flaky:
+        name = "flaky"
+
+        def __init__(self):
+            self.n = 0
+
+        def complete_json(self, system, user, schema, schema_name):
+            self.n += 1
+            if self.n == 1:
+                return {"charges": [{"label": "x"}]}   # missing amount_raw -> invalid
+            return {}                                   # valid (all fields optional)
+
+    out = extract("some source document text", _Flaky())
+    assert out.attempts == 2 and out.repaired
+    sev = {w.code: w.severity for w in out.warnings}
+    assert sev["SCHEMA_VALIDATION_FAILED"] == "medium"      # not "low"
+    assert not any(w.severity in ("low", "fatal") for w in out.warnings)
+
+
 def test_total_line_item_used_as_total_when_no_explicit_total():
     """If the only place the total appears is a 'Amount Due' line, use it."""
     rich = RichExtraction(

@@ -179,10 +179,18 @@ def project(
 
     # -------------------------------------------------------------- commodity
     seen: list[str] = []
+    seen_keys: set[str] = set()
     for s in rich.stops:
         for c in s.commodities:
             d = (c.description or "").strip()
-            if d and d not in seen:
+            if not d:
+                continue
+            # Normalise for dedup so OCR casing/punctuation variants of one
+            # commodity ("Plastic Components." vs "plastic Components") collapse
+            # instead of firing a spurious MULTI_COMMODITY_FLATTENED.
+            key = re.sub(r"[^a-z0-9]+", " ", d.lower()).strip()
+            if key and key not in seen_keys:
+                seen_keys.add(key)
                 seen.append(d)
     load.commodity = "; ".join(seen) or None
     if len(seen) > 1:

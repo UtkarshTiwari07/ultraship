@@ -88,6 +88,20 @@ def test_place_multi_token_city():
     assert (p.city, p.state) == ("San Jose", "CA")
 
 
+def test_place_prefers_state_zip_cell_over_leading_ocr_noise():
+    """OCR reflowed a stray 'il' to the front; the real state is GA by the ZIP."""
+    p = parse_place(
+        "il, Pickup 1234 Industrial Rd. es Plastic Components. 24,000\n"
+        "Atlanta, GA 30336 Mate")
+    assert (p.city, p.state, p.zip) == ("Atlanta", "GA", "30336")
+
+
+def test_place_strips_ocr_pipe_prefix():
+    """OCR cell-bleed 'TP | Kansas City' must resolve to Kansas City."""
+    p = parse_place("115 Logistics St.\nTP | Kansas City, MO 64120")
+    assert (p.city, p.state, p.zip) == ("Kansas City", "MO", "64120")
+
+
 @pytest.mark.parametrize("raw,expected", [
     ("Flatbed", "flatbed"),
     ("53' Dry Van", "van"),
