@@ -169,6 +169,55 @@ def test_repaired_extraction_is_not_forced_to_low_confidence():
     assert not any(w.severity in ("low", "fatal") for w in out.warnings)
 
 
+def test_parenthetical_note_does_not_misclassify_charge_as_line_haul():
+    """"Carrier Charge (... not included in base rate)" must classify on its
+    head, not match _LINE_HAUL on the stray word 'base' in the note.
+
+    Regression from a live OCR run where it inflated line_haul to 700.
+    """
+    rich = RichExtraction(
+        total_raw=Located(value_raw="700.00 USD"),
+        stops=[
+            RawStop(sequence=1, kind="pickup", location_raw="Dallas, TX 75235", date_raw="08/25/2026"),
+            RawStop(sequence=2, kind="drop", location_raw="Nashville, TN 37217", date_raw="08/27/2026"),
+        ],
+        charges=[
+            RawCharge(label="Base Carrier Rate", amount_raw="$500.00"),
+            RawCharge(
+                label="Carrier Charge\n(Accessorial / special handling fee not included in base rate)",
+                amount_raw="$200.00"),
+        ],
+    )
+    loc = infer_date_locale("08/25/2026 08/27/2026", TODAY)
+    load, _warns, recon, _notes = project(rich, loc, TODAY)
+    assert load.line_haul_rate == 500.0                      # not 700
+    assert recon.status == "unmapped_charge"
+    assert [o["amount"] for o in recon.other_charges] == [200.0]
+
+
+def test_header_total_disagreement_flags_medium_not_low():
+    """A header 'agreed amount' disagreeing with the kept breakdown total is a
+    review flag (medium), not a hard block -- the breakdown total is kept."""
+    rich = RichExtraction(
+        reference_id=Located(value_raw="LD-DIS-01"),
+        equipment_raw=Located(value_raw="Flatbed"),
+        agreed_amount=Located(value_raw="$500.00"),
+        total_raw=Located(value_raw="$700.00"),
+        stops=[
+            RawStop(sequence=1, kind="pickup", location_raw="Dallas, TX 75235", date_raw="08/25/2026",
+                    commodities=[RawCommodity(description="Steel Beams", weight_raw="22,000")]),
+            RawStop(sequence=2, kind="drop", location_raw="Nashville, TN 37217", date_raw="08/27/2026"),
+        ],
+        charges=[RawCharge(label="Base Carrier Rate", amount_raw="$700.00")],
+    )
+    loc = infer_date_locale("08/25/2026 08/27/2026", TODAY)
+    load, warns, _recon, _notes = project(rich, loc, TODAY)
+    sev = {w.code: w.severity for w in warns}
+    assert sev["TOTAL_DISAGREEMENT"] == "medium"          # was "low"
+    # nothing forces low here -> the header disagreement holds it at medium, not low
+    assert not any(w.severity in ("low", "fatal") for w in warns)
+
+
 def test_total_line_item_used_as_total_when_no_explicit_total():
     """If the only place the total appears is a 'Amount Due' line, use it."""
     rich = RichExtraction(
