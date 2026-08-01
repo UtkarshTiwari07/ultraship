@@ -64,7 +64,21 @@ python -m ratecon.cli tests/fixtures/provided/LD64408.txt --provider replay
 `LD64408` proves the pipeline: three stops, a header that disagrees with its stops,
 and an unmapped `$200 Carrier Charge`. `fuel_surcharge` stays **null** (the $200 is not
 fuel), the gap is preserved in `_meta.reconciliation`, and confidence is `medium`.
-Sample documents to try are in [`samples/`](samples/).
+
+### Sample documents
+
+[`samples/`](samples/) holds example rate confirmations (as document images) covering a
+range of cases — a clean load, a real fuel surcharge, an unmapped accessorial charge, a
+rate breakdown whose components don't reconcile, a day-first (DD/MM) date, and a
+cross-border Canadian lane. Run any of them through OCR and compare the confidence band
+and `_meta.reconciliation`:
+
+```bash
+python -m ratecon.cli "samples/<file>" --provider deepseek
+```
+
+They deliberately land at different confidence bands (`high` / `medium` / `low`), so the
+set demonstrates the auto-populate-vs-review routing end to end.
 
 ## How it works
 
