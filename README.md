@@ -123,8 +123,7 @@ calibration needs a labelled eval set.
   named-month date → trip-ordering constraint → US default, flagged and capped at
   `medium`. Two-digit years are clamped near today (`26` → 2026).
 
-See [`EDGE_CASES.md`](EDGE_CASES.md) for the full failure-mode checklist and
-[`TESTING.md`](TESTING.md) for how to generate and run test documents.
+See [`EDGE_CASES.md`](EDGE_CASES.md) for the full failure-mode checklist.
 
 ## Layout
 
