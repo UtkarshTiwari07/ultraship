@@ -41,6 +41,14 @@ US_STATES = {
     "VA","WA","WV","WI","WY","DC",
 }
 
+# Canadian provinces/territories. UltraShip is a North American TMS and
+# cross-border (especially Canada) loads are everyday freight, so the address
+# parser must recognise province codes, not just US states.
+CA_PROVINCES = {
+    "AB","BC","MB","NB","NL","NS","NT","NU","ON","PE","QC","SK","YT",
+}
+REGION_CODES = US_STATES | CA_PROVINCES
+
 # Open-deck family. Mapped to "other", not "flatbed" -- see README.
 _OPEN_DECK_VARIANTS = {"step deck", "stepdeck", "conestoga", "rgn", "lowboy", "double drop"}
 
@@ -259,7 +267,7 @@ def parse_place(raw: Optional[str]) -> ParsedPlace:
     for i, p in enumerate(parts):
         toks = p.split()
         tok = toks[0].upper() if toks else ""
-        if tok in US_STATES:
+        if tok in REGION_CODES:
             has_zip = bool(re.search(r"\b\d{5}\b", p))
             if state_idx is None or has_zip:
                 state_idx = i
@@ -267,7 +275,7 @@ def parse_place(raw: Optional[str]) -> ParsedPlace:
             if has_zip:
                 break
     if state_idx is None:
-        out.notes.append("no US state code found")
+        out.notes.append("no US state or Canadian province code found")
         return out
     if state_idx == 0:
         out.notes.append("state code appeared first; no city token before it")
