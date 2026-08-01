@@ -159,7 +159,10 @@ def project(
     for n in eq_notes:
         warns.append(_w("EQUIPMENT_BUCKETED", "medium", n))
     if load.equipment_type is None:
-        warns.append(_w("EQUIPMENT_MISSING", "low", "no equipment type found"))
+        # medium, not low: equipment is not a critical field in the confidence
+        # contract, so a doc that omits the trailer type is a draft for a human
+        # to complete, not a hard block. (See confidence.CRITICAL_FIELDS.)
+        warns.append(_w("EQUIPMENT_MISSING", "medium", "no equipment type found"))
     notes["equipment_raw"] = rich.equipment_raw.value_raw
 
     # ----------------------------------------------------------------- weight
