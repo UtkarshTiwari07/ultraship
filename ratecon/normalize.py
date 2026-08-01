@@ -284,6 +284,18 @@ def parse_place(raw: Optional[str]) -> ParsedPlace:
     city = parts[state_idx - 1]
     city = re.sub(r"\s*\([^)]*\)", "", city).strip()        # drop '(MIA)' style codes
     city = re.sub(r"^[A-Za-z0-9]{0,3}\s*\|\s*", "", city)   # OCR cell-bleed like 'TP | '
+    # Strip a leading stop marker that bled into the cell: '1 Pickup', '2 Drop',
+    # 'I Pickup', 'Drop', 'Delivery' (happens when columns aren't comma/line
+    # separated in the extracted text).
+    city = re.sub(r"^\s*(?:[0-9IVXl]+\s+)?(?:pickup|drop|delivery|stop)\b\.?\s*",
+                  "", city, flags=re.I)
+    # Strip a leading street address up to its street-type suffix, so a segment
+    # like '1234 W. Touhy Ave. Des Plaines' yields 'Des Plaines'. Requires a
+    # leading number, so a city such as 'St. Louis' is never touched.
+    city = re.sub(
+        r"^\s*\d+\s+.*?\b(?:ave|avenue|st|street|dr|drive|blvd|boulevard|rd|road|"
+        r"pkwy|parkway|ln|lane|way|ct|court|hwy|highway|pl|place|cir|circle|"
+        r"ter|terrace|ste|suite)\b\.?,?\s*", "", city, flags=re.I)
     city = re.sub(r"^\d+\s+", "", city).strip()
     out.city = city or None
     if not out.city:
