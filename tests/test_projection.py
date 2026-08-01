@@ -218,6 +218,30 @@ def test_header_total_disagreement_flags_medium_not_low():
     assert not any(w.severity in ("low", "fatal") for w in warns)
 
 
+def test_missing_equipment_is_medium_not_low():
+    """A rate con that omits the trailer type is a draft (medium), not a hard
+    block (low): equipment is not a critical field in the confidence contract.
+    """
+    from ratecon import confidence
+
+    rich = RichExtraction(
+        reference_id=Located(value_raw="LD-NOEQ-01"),
+        total_raw=Located(value_raw="$1,400.00"),
+        stops=[
+            RawStop(sequence=1, kind="pickup", location_raw="Dallas, TX 75235", date_raw="08/25/2026",
+                    commodities=[RawCommodity(description="Steel", weight_raw="22,000")]),
+            RawStop(sequence=2, kind="drop", location_raw="Nashville, TN 37217", date_raw="08/27/2026"),
+        ],
+        charges=[RawCharge(label="Line Haul", amount_raw="$1,400.00")],
+    )   # deliberately no equipment_raw
+    loc = infer_date_locale("08/25/2026 08/27/2026", TODAY)
+    load, warns, _recon, _notes = project(rich, loc, TODAY)
+    assert load.equipment_type is None
+    assert {w.code: w.severity for w in warns}["EQUIPMENT_MISSING"] == "medium"
+    band, _reasons = confidence.score(load, warns)
+    assert band == "medium"          # not low
+
+
 def test_total_line_item_used_as_total_when_no_explicit_total():
     """If the only place the total appears is a 'Amount Due' line, use it."""
     rich = RichExtraction(
