@@ -108,6 +108,23 @@ def test_place_reads_canadian_province():
     assert (p.city, p.state, p.zip) == ("Toronto", "ON", None)
 
 
+def test_place_strips_leading_street_when_no_comma():
+    """Street and city on one segment: '1234 W. Touhy Ave. Des Plaines' -> city."""
+    p = parse_place("1234 W. Touhy Ave. Des Plaines, IL 60018")
+    assert (p.city, p.state, p.zip) == ("Des Plaines", "IL", "60018")
+
+
+def test_place_strips_stop_marker_that_bled_into_the_cell():
+    assert parse_place("I Pickup Toronto, ON M9W 5R1, Canada").city == "Toronto"
+    assert parse_place("2 Drop Detroit, MI 48226, USA").city == "Detroit"
+
+
+def test_place_keeps_city_that_starts_with_a_street_word():
+    """'St. Louis' must survive -- the street strip requires a leading number."""
+    p = parse_place("400 Market St., St. Louis, MO 63102")
+    assert (p.city, p.state) == ("St. Louis", "MO")
+
+
 @pytest.mark.parametrize("raw,expected", [
     ("Flatbed", "flatbed"),
     ("53' Dry Van", "van"),

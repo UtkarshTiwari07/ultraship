@@ -90,8 +90,9 @@ def enforce_grounding(rich: RichExtraction, source: str) -> list[Warning_]:
     """
     out: list[Warning_] = []
 
-    for attr in ("reference_id", "header_pickup_date", "agreed_amount",
-                 "equipment_raw", "total_raw"):
+    # Non-money located fields are verified by span, because there is no
+    # independent check for them.
+    for attr in ("reference_id", "header_pickup_date", "equipment_raw"):
         loc = getattr(rich, attr)
         if loc.value_raw is None:
             continue
@@ -103,14 +104,19 @@ def enforce_grounding(rich: RichExtraction, source: str) -> list[Warning_]:
             loc.value_raw = None
             loc.span = None
 
-    # Money gets a second, independent check that does not depend on the
-    # model having cooperated with the span instruction.
-    total = parse_money(rich.total_raw.value_raw)
-    if total is not None and not money_supported(total, source):
-        out.append(Warning_(code="MONEY_UNGROUNDED", severity="low",
-                            detail=f"total {total} does not appear in the source text; "
-                                   f"discarded"))
-        rich.total_raw.value_raw = None
+    # Money-bearing located fields are guarded by the money-subset check, which
+    # is more robust than a span-string match: a correctly-read total can fail
+    # the span check when the source interleaves the label and the figure across
+    # table cells, but a figure the document never printed is still discarded.
+    for attr in ("total_raw", "agreed_amount"):
+        loc = getattr(rich, attr)
+        amt = parse_money(loc.value_raw)
+        if amt is not None and not money_supported(amt, source):
+            out.append(Warning_(
+                code="MONEY_UNGROUNDED", severity="low",
+                detail=f"{attr} {amt} does not appear in the source text; discarded"))
+            loc.value_raw = None
+            loc.span = None
 
     kept = []
     for ch in rich.charges:

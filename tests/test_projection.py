@@ -46,6 +46,29 @@ def test_money_check_rejects_figure_not_in_document():
     assert not money_supported(3400.0, "Total 700.00 USD")
 
 
+def test_money_field_kept_when_value_printed_even_if_span_mismatches():
+    """A real total whose span isn't a contiguous substring (table cells) is
+    kept via the money-subset check, not discarded as a hallucination."""
+    from ratecon.extract import enforce_grounding
+    from ratecon.models import Located, RichExtraction
+    source = "Base Rate $1,800.00\nFuel Surcharge $450.00\nTOTAL\n\n$2,250.00"
+    rich = RichExtraction(total_raw=Located(value_raw="$2,250.00", span="TOTAL $2,250.00"))
+    warns = enforce_grounding(rich, source)
+    assert rich.total_raw.value_raw == "$2,250.00"          # kept
+    assert not any(w.code == "SPAN_UNVERIFIED" for w in warns)
+
+
+def test_money_field_discarded_when_figure_absent():
+    """A figure the document never printed is still discarded."""
+    from ratecon.extract import enforce_grounding
+    from ratecon.models import Located, RichExtraction
+    source = "Base Rate $1,800.00\nTOTAL $2,250.00"
+    rich = RichExtraction(agreed_amount=Located(value_raw="$9,999.00", span="AGREED $9,999.00"))
+    warns = enforce_grounding(rich, source)
+    assert rich.agreed_amount.value_raw is None             # 9999 not printed
+    assert any(w.code == "MONEY_UNGROUNDED" for w in warns)
+
+
 def test_hallucinated_values_are_discarded_and_drop_confidence():
     res = load_case("adv_hallucination_bait")
     assert "SPAN_UNVERIFIED" in codes(res)
