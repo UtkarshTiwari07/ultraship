@@ -11,7 +11,10 @@ Ladder, in order. Each rung is cheaper than a wrong answer:
    a fully-null load at low confidence and the document routes to a human.
 
 There is deliberately no rung that returns a partially-guessed object at
-anything above low confidence.
+anything above low confidence. But a transient failure a later attempt
+recovers from is graded medium, not low: the ladder exists to recover, so a
+successful repair must not read as untrustworthy data. Only total failure
+(EXTRACTION_ABANDONED, fatal) forces low.
 """
 
 from __future__ import annotations
@@ -53,14 +56,17 @@ def extract(text: str, client: LLMClient, max_repairs: int = 2) -> ExtractOutcom
             payload = client.complete_json(system, prompt, schema, SCHEMA_NAME)
         except Exception as exc:  # transport, auth, refusal
             last_errors = f"{type(exc).__name__}: {exc}"
-            warnings.append(Warning_(code="LLM_CALL_FAILED", severity="low",
+            # Transient: severity medium, not low. If a later attempt succeeds
+            # the retry ladder did its job and the recovered data should not be
+            # forced to low. Total failure is caught by EXTRACTION_ABANDONED.
+            warnings.append(Warning_(code="LLM_CALL_FAILED", severity="medium",
                                      detail=last_errors[:300]))
             continue
         try:
             rich = RichExtraction.model_validate(payload)
         except ValidationError as ve:
             last_errors = ve.json(include_url=False)[:2000]
-            warnings.append(Warning_(code="SCHEMA_VALIDATION_FAILED", severity="low",
+            warnings.append(Warning_(code="SCHEMA_VALIDATION_FAILED", severity="medium",
                                      detail=f"attempt {attempts}: {ve.error_count()} error(s)"))
             continue
 
